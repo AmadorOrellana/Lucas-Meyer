@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Lucas Meyer · Entrenador de Guion</title>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <!-- =========================
+       CABECERA
+       ========================= -->
+
+  <header class="topbar">
+
+    <div class="marca">
+      <div class="marca-icono">LM</div>
+
+      <div>
+        <h1>Lucas Meyer</h1>
+        <p>Los Invasores · Egon Wolff</p>
+      </div>
+    </div>
+
+    <div class="progreso-header">
+      <strong id="porcentaje-header">0%</strong>
+      <span>aprendido</span>
+    </div>
+
+  </header>
+
+
+  <!-- =========================
+       NAVEGACIÓN
+       ========================= -->
+
+
+  <nav class="navegacion">
+
+    <button class="nav-btn activo" data-pantalla="inicio">
+      <span>⌂</span>
+      Inicio
+    </button>
+
+    <button class="nav-btn" data-pantalla="aprender">
+      <span>🧠</span>
+      Aprender
+    </button>
+
+    <button class="nav-btn" data-pantalla="ensayar">
+      <span>🎭</span>
+      Ensayar
+    </button>
+
+    <button class="nav-btn" data-pantalla="textos">
+      <span>📖</span>
+      Mis textos
+    </button>
+
+    <button class="nav-btn" data-pantalla="progreso">
+      <span>✓</span>
+      Progreso
+    </button>
+
+  </nav>
+
+
+  <main>
+
+    <!-- ========================================
+         INICIO
+         ======================================== -->
+
+    <section id="inicio" class="pantalla activa">
+
+      <div class="hero">
+
+        <p class="etiqueta">ENTRENADOR DE GUION</p>
+
+        <h2>
+          Aprende a<br>
+          <span>Lucas Meyer</span>
+        </h2>
+
+        <p class="descripcion">
+          Memoriza tus parlamentos, practica tus entradas
+          y ensaya Los Invasores escena por escena.
+        </p>
+
+      </div>
+
+
+      <div class="resumen-inicio">
+
+        <div class="dato">
+          <strong id="inicio-total">96</strong>
+          <span>Parlamentos</span>
+        </div>
+
+        <div class="dato">
+          <strong id="inicio-dominados">0</strong>
+          <span>Dominados</span>
+        </div>
+
+        <div class="dato">
+          <strong id="inicio-dificiles">0</strong>
+          <span>Difíciles</span>
+        </div>
+
+        <div class="dato">
+          <strong id="inicio-porcentaje">0%</strong>
+          <span>Progreso</span>
+        </div>
+
+      </div>
+
+
+      <div class="acciones-inicio">
+
+        <button class="accion-principal" data-ir="aprender">
+          <span class="accion-icono">🧠</span>
+
+          <div>
+            <strong>Continuar aprendiendo</strong>
+            <small>
+              Memoriza tus parlamentos uno por uno
+            </small>
+          </div>
+
+          <span class="flecha">→</span>
+        </button>
+
+
+        <button class="accion-secundaria" data-ir="ensayar">
+          <span class="accion-icono">🎭</span>
+
+          <div>
+            <strong>Ensayar la escena</strong>
+            <small>
+              Los otros personajes te dan el pie
+            </small>
+          </div>
+
+          <span class="flecha">→</span>
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ========================================
+         APRENDER
+         ======================================== -->
+
+    <section id="aprender" class="pantalla">
+
+      <div class="titulo-seccion">
+
+        <div>
+          <p class="etiqueta">MODO APRENDER</p>
+          <h2>Memoriza tu texto</h2>
+        </div>
+
+        <div class="contador-superior">
+          <strong id="aprender-numero">1</strong>
+          <span>/</span>
+          <span id="aprender-total">96</span>
+        </div>
+
+      </div>
+
+
+      <!-- Selector -->
+
+      <div class="barra-filtros">
+
+        <label for="selector-cuadro">
+          Practicar
+        </label>
+
+        <select id="selector-cuadro">
+
+          <option value="todos">
+            Todo el personaje
+          </option>
+
+          <option value="1-1">
+            Acto I · Cuadro I
+          </option>
+
+          <option value="1-2">
+            Acto I · Cuadro II
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="tarjeta-aprender">
+
+        <!-- PIE -->
+
+        <div class="bloque-pie">
+
+          <div class="encabezado-dialogo">
+
+            <span id="aprender-personaje">
+              PIETÁ
+            </span>
+
+            
+            <button
+  id="aprender-pausar"
+  class="boton-icono"
+  title="Pausar o continuar la voz"
+>
+  ⏸
+</button>
+
+          </div>
+
+          <p id="aprender-pie">
+            ¿Por qué? ¿Por qué somos ricos?
+          </p>
+
+        </div>
+
+
+        <!-- TU TURNO -->
+
+        <div class="bloque-lucas">
+
+          <div class="tu-turno">
+            TU TURNO · LUCAS
+          </div>
+
+          <div id="aprender-respuesta" class="respuesta-oculta">
+            •••••••••••••••
+          </div>
+
+
+          <!-- PISTAS -->
+
+          <div class="herramientas-memoria">
+
+  <button id="hablar-texto" class="boton-microfono">
+    🎤 Hablar
+  </button>
+
+  <button id="primera-palabra">
+    Primera palabra
+  </button>
+
+  <button id="mostrar-pista">
+    Pista
+  </button>
+
+  <button id="ver-texto">
+    Ver texto
+  </button>
+
+</div>
+
+<div id="estado-microfono" class="estado-microfono oculto">
+  🎤 Escuchando...
+</div>
+
+<div id="texto-reconocido" class="texto-reconocido oculto"></div>
+
+
+          <div id="zona-pista" class="zona-pista oculto"></div>
+
+
+          <div id="acotacion-aprender" class="acotacion oculto"></div>
+
+        </div>
+
+
+        <!-- EVALUACIÓN -->
+
+        <div id="evaluacion-aprender" class="evaluacion oculto">
+
+          <p>¿Cómo te fue?</p>
+
+          <div class="botones-evaluacion">
+
+            <button id="aprender-repetir" class="evaluar repetir">
+              ↻
+              <span>Repetir</span>
+            </button>
+
+            <button id="aprender-dificil" class="evaluar dificil">
+              ★
+              <span>Difícil</span>
+            </button>
+
+            <button id="aprender-bien" class="evaluar bien">
+              ✓
+              <span>Lo sabía</span>
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ANTERIOR / SIGUIENTE -->
+
+      <div class="navegacion-replicas">
+
+        <button id="aprender-anterior">
+          ← Anterior
+        </button>
+
+        <button id="aprender-siguiente">
+          Siguiente →
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ========================================
+         ENSAYAR
+         ======================================== -->
+
+    <section id="ensayar" class="pantalla">
+
+      <div class="titulo-seccion">
+
+        <div>
+          <p class="etiqueta">MODO ENSAYO</p>
+          <h2>Ensaya la obra</h2>
+        </div>
+
+      </div>
+
+
+      <div class="barra-filtros">
+
+        <label for="selector-ensayo">
+          Escena
+        </label>
+
+        <select id="selector-ensayo">
+
+          <option value="todos">
+            Desde el principio
+          </option>
+
+          <option value="1-1">
+            Acto I · Cuadro I
+          </option>
+
+          <option value="1-2">
+            Acto I · Cuadro II
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="panel-ensayo">
+
+        <div class="estado-ensayo">
+
+          <span>
+            PARLAMENTO
+          </span>
+
+          <strong>
+            <span id="ensayo-numero">1</span>
+            /
+            <span id="ensayo-total">96</span>
+          </strong>
+
+        </div>
+
+
+        <div class="personaje-ensayo">
+
+          <span id="ensayo-personaje">
+            PIETÁ
+          </span>
+
+          <p id="ensayo-pie">
+            ¿Por qué? ¿Por qué somos ricos?
+          </p>
+
+          <button id="ensayo-escuchar">
+            🔊 Escuchar réplica
+          </button>
+          <button id="ensayo-pausar">
+  ⏸ Pausar
+</button>
+
+        </div>
+
+
+        <div class="turno-lucas">
+
+          <span class="indicador-turno">
+            TU TURNO
+          </span>
+
+          <h3>LUCAS MEYER</h3>
+
+          <p>
+            Di tu parlamento de memoria.
+          </p>
+
+
+          <div id="ensayo-texto-lucas" class="respuesta-oculta">
+            •••••••••••••••••
+          </div>
+
+
+          <button id="ensayo-mostrar">
+            Mostrar mi texto
+          </button>
+
+        </div>
+
+
+        <div id="ensayo-evaluacion" class="evaluacion oculto">
+
+          <div class="botones-evaluacion">
+
+            <button id="ensayo-repetir" class="evaluar repetir">
+              ↻ Repetir
+            </button>
+
+            <button id="ensayo-dificil" class="evaluar dificil">
+              ★ Difícil
+            </button>
+
+            <button id="ensayo-bien" class="evaluar bien">
+              ✓ Lo sabía
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ========================================
+         MIS TEXTOS
+         ======================================== -->
+
+    <section id="textos" class="pantalla">
+
+      <div class="titulo-seccion">
+
+        <div>
+          <p class="etiqueta">MIS PARLAMENTOS</p>
+          <h2>Todo Lucas Meyer</h2>
+        </div>
+
+        <div class="contador-textos">
+          <strong id="cantidad-textos">96</strong>
+          <span>textos</span>
+        </div>
+
+      </div>
+
+
+      <div class="buscador">
+
+        <span>⌕</span>
+
+        <input
+          type="search"
+          id="buscar-texto"
+          placeholder="Buscar en mis parlamentos..."
+        >
+
+      </div>
+
+
+      <div class="filtros-textos">
+
+        <button class="filtro-texto activo" data-filtro="todos">
+          Todos
+        </button>
+
+        <button class="filtro-texto" data-filtro="dificiles">
+          ★ Difíciles
+        </button>
+
+        <button class="filtro-texto" data-filtro="dominados">
+          ✓ Dominados
+        </button>
+
+      </div>
+
+
+      <div id="lista-textos">
+        <!-- JavaScript carga aquí los parlamentos -->
+      </div>
+
+    </section>
+
+
+    <!-- ========================================
+         PROGRESO
+         ======================================== -->
+
+    <section id="progreso" class="pantalla">
+
+      <div class="titulo-seccion">
+
+        <div>
+          <p class="etiqueta">TU PROGRESO</p>
+          <h2>¿Cómo vas?</h2>
+        </div>
+
+      </div>
+
+
+      <div class="progreso-general">
+
+        <div class="circulo-progreso">
+
+          <strong id="progreso-porcentaje">
+            0%
+          </strong>
+
+          <span>
+            aprendido
+          </span>
+
+        </div>
+
+
+        <div class="barra-contenedor">
+
+          <div class="barra-info">
+
+            <span>Progreso general</span>
+
+            <strong id="progreso-fraccion">
+              0 / 96
+            </strong>
+
+          </div>
+
+          <div class="barra">
+            <div id="barra-progreso"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="estadisticas">
+
+        <div class="estadistica">
+
+          <span class="estadistica-icono">
+            📖
+          </span>
+
+          <strong id="estadistica-total">
+            96
+          </strong>
+
+          <small>
+            Parlamentos
+          </small>
+
+        </div>
+
+
+        <div class="estadistica">
+
+          <span class="estadistica-icono">
+            ✓
+          </span>
+
+          <strong id="estadistica-dominados">
+            0
+          </strong>
+
+          <small>
+            Dominados
+          </small>
+
+        </div>
+
+
+        <div class="estadistica">
+
+          <span class="estadistica-icono">
+            ★
+          </span>
+
+          <strong id="estadistica-dificiles">
+            0
+          </strong>
+
+          <small>
+            Necesitan refuerzo
+          </small>
+
+        </div>
+
+      </div>
+
+
+      <div class="refuerzo">
+
+        <div class="refuerzo-titulo">
+
+          <div>
+            <p class="etiqueta">
+              REPASO
+            </p>
+
+            <h3>
+              Textos que necesitan refuerzo
+            </h3>
+          </div>
+
+          <button id="practicar-dificiles">
+            Practicar →
+          </button>
+
+        </div>
+
+
+        <div id="lista-dificiles">
+
+          <p class="sin-dificiles">
+            Todavía no has marcado ningún parlamento como difícil.
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================
+       PIE
+       ========================= -->
+
+  <footer>
+
+    <p>
+      Entrenador personal · Lucas Meyer
+    </p>
+
+  </footer>
+
+
+  <script src="guion.js"></script>
+  <script src="script.js"></script>
+
+</body>
+</html>
