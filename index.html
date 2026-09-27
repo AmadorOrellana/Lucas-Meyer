@@ -166,15 +166,69 @@
           <h2>Memoriza tu texto</h2>
         </div>
 
-        <div class="contador-superior">
-          <strong id="aprender-numero">1</strong>
-          <span>/</span>
-          <span id="aprender-total">96</span>
-        </div>
+        <div class="controles-parlamento">
+
+  <div class="contador-superior">
+    <strong id="aprender-numero">1</strong>
+    <span>/</span>
+    <span id="aprender-total">96</span>
+  </div>
+
+  <button
+    id="reiniciar-aprender"
+    type="button"
+    title="Volver al primer parlamento"
+  >
+    ↺ Reiniciar
+  </button>
+
+  <button
+    id="abrir-selector-parlamento"
+    type="button"
+  >
+    ☰ Ir a parlamento
+  </button>
+
+</div>
 
       </div>
 
+<div
+  id="panel-parlamentos"
+  class="panel-parlamentos oculto"
+>
 
+  <div class="panel-parlamentos-cabecera">
+
+    <h3>Ir a un parlamento</h3>
+
+    <button
+      id="cerrar-selector-parlamento"
+      type="button"
+      title="Cerrar"
+    >
+      ✕
+    </button>
+
+  </div>
+
+  <input
+    id="buscar-parlamento"
+    type="search"
+    placeholder="Buscar número, personaje o texto..."
+    autocomplete="off"
+  >
+
+  <div id="lista-selector-parlamentos">
+  </div>
+
+  <div
+    id="vista-previa-parlamento"
+    class="vista-previa-parlamento oculto"
+  >
+  </div>
+
+</div>
       <!-- Selector -->
 
       <div class="barra-filtros">
@@ -210,20 +264,40 @@
 
           <div class="encabezado-dialogo">
 
-            <span id="aprender-personaje">
-              PIETÁ
-            </span>
+  <span id="aprender-personaje">
+    PIETÁ
+  </span>
 
-            
-            <button
-  id="aprender-pausar"
-  class="boton-icono"
-  title="Pausar o continuar la voz"
->
-  ⏸
-</button>
+  <div class="controles-audio">
 
-          </div>
+    <button
+      id="aprender-pausar"
+      class="boton-icono"
+      title="Reproducir o pausar"
+    >
+      ▶
+    </button>
+
+    <div class="velocidad-inline">
+
+      <input
+        type="range"
+        id="velocidad-voz"
+        min="0.6"
+        max="3.5"
+        step="0.1"
+        value="1.0"
+      >
+
+      <strong id="valor-velocidad">
+        1.0×
+      </strong>
+
+    </div>
+
+  </div>
+
+</div>
 
           <p id="aprender-pie">
             ¿Por qué? ¿Por qué somos ricos?
@@ -337,13 +411,68 @@
 
       <div class="titulo-seccion">
 
-        <div>
-          <p class="etiqueta">MODO ENSAYO</p>
-          <h2>Ensaya la obra</h2>
-        </div>
+  <div>
+    <p class="etiqueta">MODO ENSAYO</p>
+    <h2>Ensaya la obra</h2>
+  </div>
 
-      </div>
+  <div class="controles-parlamento">
 
+    <button
+      id="reiniciar-ensayo"
+      type="button"
+      title="Volver al primer parlamento"
+    >
+      ↺ Reiniciar
+    </button>
+
+    <button
+      id="abrir-selector-ensayo"
+      type="button"
+    >
+      ☰ Ir a parlamento
+    </button>
+
+  </div>
+
+</div>
+
+<div
+  id="panel-parlamentos-ensayo"
+  class="panel-parlamentos oculto"
+>
+
+  <div class="panel-parlamentos-cabecera">
+
+    <h3>Ir a un parlamento</h3>
+
+    <button
+      id="cerrar-selector-ensayo"
+      type="button"
+      title="Cerrar"
+    >
+      ✕
+    </button>
+
+  </div>
+
+  <input
+    id="buscar-parlamento-ensayo"
+    type="search"
+    placeholder="Buscar número, personaje o texto..."
+    autocomplete="off"
+  >
+
+  <div id="lista-selector-parlamentos-ensayo">
+  </div>
+
+  <div
+    id="vista-previa-parlamento-ensayo"
+    class="vista-previa-parlamento oculto"
+  >
+  </div>
+
+</div>
 
       <div class="barra-filtros">
 
@@ -397,12 +526,35 @@
             ¿Por qué? ¿Por qué somos ricos?
           </p>
 
-          <button id="ensayo-escuchar">
-            🔊 Escuchar réplica
-          </button>
-          <button id="ensayo-pausar">
-  ⏸ Pausar
-</button>
+          <div class="controles-ensayo-voz">
+
+  <button
+    id="ensayo-pausar"
+    class="boton-icono"
+    type="button"
+    title="Reproducir o pausar"
+  >
+    ▶
+  </button>
+
+  <div class="velocidad-inline">
+
+    <input
+      type="range"
+      id="velocidad-voz-ensayo"
+      min="0.6"
+      max="3.5"
+      step="0.1"
+      value="1.0"
+    >
+
+    <strong id="valor-velocidad-ensayo">
+      1.0×
+    </strong>
+
+  </div>
+
+</div>
 
         </div>
 
@@ -425,34 +577,67 @@
           </div>
 
 
-          <button id="ensayo-mostrar">
-            Mostrar mi texto
-          </button>
+          
+<div
+  id="estado-microfono-ensayo"
+  class="estado-microfono oculto"
+>
+  🎤 Tu turno. Habla...
+</div>
 
-        </div>
+<div
+  id="texto-reconocido-ensayo"
+  class="texto-reconocido oculto"
+></div>
+<button
+  id="ensayo-termine"
+  type="button"
+  class="oculto"
+>
+  ✓ Terminé
+</button>
+
+                </div>
 
 
-        <div id="ensayo-evaluacion" class="evaluacion oculto">
+        <!-- RESULTADO DEL PARLAMENTO ANTERIOR -->
 
-          <div class="botones-evaluacion">
+        <div
+          id="resultado-anterior-ensayo"
+          class="resultado-anterior-ensayo oculto"
+        >
 
-            <button id="ensayo-repetir" class="evaluar repetir">
-              ↻ Repetir
-            </button>
+          <div class="resultado-anterior-cabecera">
+            <strong>PARLAMENTO ANTERIOR</strong>
+            <span id="resultado-anterior-porcentaje"></span>
+          </div>
 
-            <button id="ensayo-dificil" class="evaluar dificil">
-              ★ Difícil
-            </button>
+          <div class="resultado-anterior-bloque">
+            <span class="etiqueta-original">DIJISTE</span>
+            <div id="resultado-anterior-dicho"></div>
+          </div>
 
-            <button id="ensayo-bien" class="evaluar bien">
-              ✓ Lo sabía
-            </button>
-
+          <div class="resultado-anterior-bloque">
+            <span class="etiqueta-original">TEXTO ORIGINAL</span>
+            <div id="resultado-anterior-original"></div>
           </div>
 
         </div>
 
+
       </div>
+
+
+      <!-- NAVEGACIÓN ENSAYO -->
+
+      <div class="navegacion-replicas">
+
+        <button id="ensayo-siguiente" type="button">
+          Siguiente →
+        </button>
+
+      </div>
+
 
     </section>
 

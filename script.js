@@ -8,8 +8,14 @@
 // ------------------------------------------------------
 
 let listaActual = [...guion];
-let indiceAprender = 0;
-let indiceEnsayo = 0;
+let indiceAprender =
+  Number(
+    localStorage.getItem("ultimoParlamentoAprender")
+  ) || 0;
+let indiceEnsayo =
+  Number(
+    localStorage.getItem("ultimoParlamentoEnsayo")
+  ) || 0;
 
 let filtroTextos = "todos";
 
@@ -220,6 +226,11 @@ function cargarAprender() {
 
   const item = listaActual[indiceAprender];
 
+// Recordar el parlamento actual de Aprender
+localStorage.setItem(
+  "ultimoParlamentoAprender",
+  String(indiceAprender)
+);
 
   porId("aprender-numero").textContent =
     indiceAprender + 1;
@@ -277,6 +288,7 @@ porId("primera-palabra")
 
     const item =
       listaActual[indiceAprender];
+      
 
     const palabras =
       item.lucas.trim().split(/\s+/);
@@ -514,7 +526,325 @@ porId("aprender-anterior")
 // ------------------------------------------------------
 // SELECTOR APRENDER
 // ------------------------------------------------------
+// ------------------------------------------------------
+// REINICIAR / IR A PARLAMENTO
+// ------------------------------------------------------
 
+const panelParlamentos =
+  porId("panel-parlamentos");
+
+const listaSelectorParlamentos =
+  porId("lista-selector-parlamentos");
+
+const vistaPreviaParlamento =
+  porId("vista-previa-parlamento");
+
+const buscarParlamento =
+  porId("buscar-parlamento");
+
+
+// ------------------------------------------------------
+// REINICIAR DESDE EL PRIMER PARLAMENTO
+// ------------------------------------------------------
+
+porId("reiniciar-aprender")
+  .addEventListener("click", () => {
+
+    speechSynthesis.cancel();
+
+    indiceAprender = 0;
+
+    cargarAprender();
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+  });
+
+
+// ------------------------------------------------------
+// ABRIR SELECTOR
+// ------------------------------------------------------
+
+porId("abrir-selector-parlamento")
+  .addEventListener("click", () => {
+
+    panelParlamentos.classList.remove("oculto");
+
+    buscarParlamento.value = "";
+
+    vistaPreviaParlamento.classList.add("oculto");
+
+    vistaPreviaParlamento.innerHTML = "";
+
+        cargarSelectorParlamentos();
+
+    // Llevar la lista automáticamente al parlamento actual
+    setTimeout(() => {
+
+      const parlamentoActual =
+        listaSelectorParlamentos.querySelector(
+          `[data-indice="${indiceAprender}"]`
+        );
+
+      if (parlamentoActual) {
+
+        parlamentoActual.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+
+      }
+
+    }, 50);
+
+    buscarParlamento.focus();
+
+  });
+
+
+// ------------------------------------------------------
+// CERRAR SELECTOR
+// ------------------------------------------------------
+
+porId("cerrar-selector-parlamento")
+  .addEventListener("click", () => {
+
+    panelParlamentos.classList.add("oculto");
+
+  });
+
+
+// ------------------------------------------------------
+// CREAR LISTA
+// ------------------------------------------------------
+
+function cargarSelectorParlamentos() {
+
+  const busqueda =
+    normalizarTexto(
+      buscarParlamento.value
+    );
+
+  const resultados =
+    listaActual.filter((item, indice) => {
+
+      if (!busqueda) {
+        return true;
+      }
+
+      const numero =
+        String(indice + 1);
+
+      const contenido =
+        normalizarTexto(
+          `${item.personajePie} ${item.pie} ${item.lucas} ${item.acotacion || ""}`
+        );
+
+      return (
+        numero.includes(busqueda) ||
+        contenido.includes(busqueda)
+      );
+
+    });
+
+
+  if (!resultados.length) {
+
+    listaSelectorParlamentos.innerHTML = `
+      <p class="sin-dificiles">
+        No encontré ningún parlamento.
+      </p>
+    `;
+
+    return;
+  }
+
+
+  listaSelectorParlamentos.innerHTML =
+    resultados.map(item => {
+
+      const indiceReal =
+        listaActual.findIndex(
+          elemento => elemento.id === item.id
+        );
+
+      const comienzoPie =
+        item.pie.length > 75
+          ? `${item.pie.slice(0, 75)}…`
+          : item.pie;
+
+      return `
+        <button
+          type="button"
+          class="opcion-parlamento"
+          data-indice="${indiceReal}"
+        >
+
+          <strong>
+            #${indiceReal + 1}
+            ·
+            ${escaparHTML(
+              item.personajePie.toUpperCase()
+            )}
+          </strong>
+
+          <span>
+            ${escaparHTML(comienzoPie)}
+          </span>
+
+        </button>
+      `;
+
+    }).join("");
+
+
+  document
+    .querySelectorAll(".opcion-parlamento")
+    .forEach(boton => {
+
+      boton.addEventListener("click", () => {
+
+        mostrarVistaPreviaParlamento(
+          Number(boton.dataset.indice)
+        );
+
+      });
+
+    });
+
+}
+
+
+// ------------------------------------------------------
+// BUSCAR MIENTRAS ESCRIBES
+// ------------------------------------------------------
+
+buscarParlamento
+  .addEventListener(
+    "input",
+    cargarSelectorParlamentos
+  );
+
+
+// ------------------------------------------------------
+// VISTA PREVIA COMPLETA
+// ------------------------------------------------------
+
+function mostrarVistaPreviaParlamento(indice) {
+
+  const item =
+    listaActual[indice];
+
+  if (!item) {
+    return;
+  }
+
+
+  const acotacion =
+    item.acotacion &&
+    item.acotacion.trim() !== ""
+      ? `
+          <div class="selector-acotacion">
+            <strong>Acotación</strong>
+            <p>
+              (${escaparHTML(item.acotacion)})
+            </p>
+          </div>
+        `
+      : "";
+
+
+  vistaPreviaParlamento.innerHTML = `
+
+    <div class="vista-previa-cabecera">
+
+      <strong>
+        Parlamento #${indice + 1}
+      </strong>
+
+      <span>
+        Acto ${item.acto}
+        · Cuadro ${item.cuadro}
+      </span>
+
+    </div>
+
+
+    <div class="selector-pie">
+
+      <strong>
+        ${escaparHTML(
+          item.personajePie.toUpperCase()
+        )}
+      </strong>
+
+      <p>
+        ${escaparHTML(item.pie)}
+      </p>
+
+    </div>
+
+
+    <div class="selector-lucas">
+
+      <strong>
+        LUCAS MEYER
+      </strong>
+
+      <p>
+        ${escaparHTML(item.lucas)}
+      </p>
+
+    </div>
+
+
+    ${acotacion}
+
+
+    <button
+      type="button"
+      id="confirmar-ir-parlamento"
+      class="confirmar-ir-parlamento"
+    >
+      Ir al parlamento #${indice + 1}
+    </button>
+
+  `;
+
+
+  vistaPreviaParlamento
+    .classList
+    .remove("oculto");
+
+
+  porId("confirmar-ir-parlamento")
+    .addEventListener("click", () => {
+
+      speechSynthesis.cancel();
+
+      indiceAprender = indice;
+
+      cargarAprender();
+
+      panelParlamentos.classList.add("oculto");
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+    });
+
+
+  vistaPreviaParlamento.scrollIntoView({
+    behavior: "smooth",
+    block: "nearest"
+  });
+
+}
 porId("selector-cuadro")
   .addEventListener("change", evento => {
 
@@ -533,6 +863,97 @@ porId("selector-cuadro")
 // ======================================================
 // VOZ
 // ======================================================
+
+
+
+
+
+// ------------------------------------------------------
+// CONTROL DE VELOCIDAD - ENSAYAR
+// ------------------------------------------------------
+
+const controlVelocidadVoz =
+  porId("velocidad-voz");
+
+const valorVelocidadVoz =
+  porId("valor-velocidad");
+
+if (controlVelocidadVoz && valorVelocidadVoz) {
+
+  // Recuperar velocidad guardada
+  const velocidadGuardada =
+    localStorage.getItem("velocidadVozAprender");
+
+  if (velocidadGuardada !== null) {
+    controlVelocidadVoz.value =
+      velocidadGuardada;
+  }
+
+  valorVelocidadVoz.textContent =
+    `${Number(controlVelocidadVoz.value).toFixed(1)}×`;
+
+  controlVelocidadVoz.addEventListener(
+    "input",
+    () => {
+
+      valorVelocidadVoz.textContent =
+        `${Number(controlVelocidadVoz.value).toFixed(1)}×`;
+
+      // Guardar velocidad elegida
+      localStorage.setItem(
+        "velocidadVozAprender",
+        controlVelocidadVoz.value
+      );
+
+    }
+  );
+
+}
+
+// ------------------------------------------------------
+// CONTROL DE VELOCIDAD - ENSAYAR
+// ------------------------------------------------------
+
+const controlVelocidadEnsayo =
+  porId("velocidad-voz-ensayo");
+
+const valorVelocidadEnsayo =
+  porId("valor-velocidad-ensayo");
+
+if (controlVelocidadEnsayo && valorVelocidadEnsayo) {
+
+  // Recuperar velocidad guardada
+  const velocidadGuardadaEnsayo =
+    localStorage.getItem("velocidadVozEnsayo");
+
+  if (velocidadGuardadaEnsayo !== null) {
+    controlVelocidadEnsayo.value =
+      velocidadGuardadaEnsayo;
+  }
+
+  valorVelocidadEnsayo.textContent =
+    `${Number(controlVelocidadEnsayo.value).toFixed(1)}×`;
+
+  controlVelocidadEnsayo.addEventListener(
+    "input",
+    () => {
+
+      valorVelocidadEnsayo.textContent =
+        `${Number(controlVelocidadEnsayo.value).toFixed(1)}×`;
+
+      localStorage.setItem(
+        "velocidadVozEnsayo",
+        controlVelocidadEnsayo.value
+      );
+
+    }
+  );
+
+}
+
+// ------------------------------------------------------
+// VOCES DISPONIBLES
+// ------------------------------------------------------
 
 let vocesDisponibles = [];
 
@@ -578,13 +999,36 @@ function hablar(texto, personaje = "") {
 
 
   // VELOCIDAD
-  const controlVelocidad =
+  let velocidadElegida = 1.0;
+
+const pantallaEnsayo =
+  porId("ensayar");
+
+const estamosEnsayando =
+  pantallaEnsayo &&
+  pantallaEnsayo.classList.contains("activa");
+
+if (
+  estamosEnsayando &&
+  controlVelocidadEnsayo
+) {
+
+  velocidadElegida =
+    Number(controlVelocidadEnsayo.value);
+
+} else {
+
+  const controlVelocidadAprender =
     porId("velocidad-voz");
 
-  mensaje.rate =
-    controlVelocidad
-      ? Number(controlVelocidad.value)
-      : 0.9;
+  if (controlVelocidadAprender) {
+    velocidadElegida =
+      Number(controlVelocidadAprender.value);
+  }
+
+}
+
+mensaje.rate = velocidadElegida;
 
   mensaje.pitch = 1;
 
@@ -603,14 +1047,51 @@ function hablar(texto, personaje = "") {
 
   } else {
 
+  // Preferencia 1: Microsoft Raul
+  vozElegida =
+    vocesDisponibles.find(voz =>
+      voz.name.toLowerCase().includes("raul")
+    );
+
+  // Preferencia 2: otras voces masculinas conocidas
+  if (!vozElegida) {
+
+    const nombresMasculinos = [
+      "jorge",
+      "pablo",
+      "diego",
+      "carlos",
+      "andres",
+      "alvaro"
+    ];
+
     vozElegida =
-      vocesDisponibles.find(voz =>
-        voz.name.includes("Microsoft Raul")
-      );
+      vocesDisponibles.find(voz => {
+
+        const nombre =
+          voz.name.toLowerCase();
+
+        return nombresMasculinos.some(
+          masculino =>
+            nombre.includes(masculino)
+        );
+
+      });
+
   }
+
+}
 
 
   if (vozElegida) {
+    console.log(
+  "PERSONAJE:",
+  personaje,
+  "→ VOZ:",
+  vozElegida.name,
+  "→ IDIOMA:",
+  vozElegida.lang
+);
 
     mensaje.voice = vozElegida;
 
@@ -630,15 +1111,46 @@ function hablar(texto, personaje = "") {
 
   mensaje.onend = () => {
 
-    const boton =
-      porId("aprender-pausar");
+  const botonAprender =
+    porId("aprender-pausar");
 
-    if (boton) {
-      boton.textContent = "▶";
-    }
+  const botonEnsayo =
+    porId("ensayo-pausar");
 
-    vozPausada = false;
-  };
+  if (botonAprender) {
+    botonAprender.textContent = "▶";
+  }
+
+  if (botonEnsayo) {
+    botonEnsayo.textContent = "▶";
+  }
+
+  vozPausada = false;
+  vozPausadaEnsayo = false;
+
+
+  // Si estamos en Modo Ensayar y el ensayo
+  // automático está activo, ahora es turno de Lucas.
+
+  const pantallaEnsayo =
+    porId("ensayar");
+
+  const estamosEnsayando =
+    pantallaEnsayo &&
+    pantallaEnsayo.classList.contains("activa");
+
+  if (
+    estamosEnsayando &&
+    ensayoAutomatico
+  ) {
+
+    setTimeout(() => {
+      iniciarMicrofonoEnsayo();
+    }, 350);
+
+  }
+
+};
 
 
   speechSynthesis.speak(mensaje);
@@ -720,15 +1232,45 @@ let reconocimiento = null;
 // NORMALIZAR TEXTO
 // ------------------------------------------------------
 
-function normalizarTexto(texto) {
+function normalizarTexto(texto = "") {
 
-  return texto
+  const digitos = {
+    "0": "cero",
+    "1": "uno",
+    "2": "dos",
+    "3": "tres",
+    "4": "cuatro",
+    "5": "cinco",
+    "6": "seis",
+    "7": "siete",
+    "8": "ocho",
+    "9": "nueve"
+  };
+
+  let resultado = String(texto)
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[¿?¡!.,;:()"…—-]/g, "")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  // Convierte cualquier grupo numérico dígito por dígito.
+  // 123 -> uno dos tres
+  // 1 2 3 -> uno dos tres
+  resultado = resultado.replace(
+    /\d+/g,
+    numero =>
+      numero
+        .split("")
+        .map(digito => digitos[digito] || digito)
+        .join(" ")
+  );
+
+  // Quitar puntuación y símbolos.
+  resultado = resultado
+    .replace(/[¿?¡!.,;:()"“”'…—–\-_/\\]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+
+  return resultado;
 }
 
 
@@ -736,29 +1278,134 @@ function normalizarTexto(texto) {
 // CALCULAR COINCIDENCIA
 // ------------------------------------------------------
 
+// ------------------------------------------------------
+// COMPARAR PALABRAS CON PEQUEÑOS ERRORES
+// ------------------------------------------------------
+
+function palabrasParecidas(a, b) {
+
+  if (a === b) {
+    return true;
+  }
+
+  // No ser permisivos con palabras muy cortas:
+  // "no", "si", "yo", etc. deben coincidir.
+  if (a.length <= 3 || b.length <= 3) {
+    return false;
+  }
+
+  // Diferencia máxima de longitud
+  if (Math.abs(a.length - b.length) > 1) {
+    return false;
+  }
+
+  // Distancia de edición (Levenshtein)
+  const matriz = Array.from(
+    { length: a.length + 1 },
+    () => Array(b.length + 1).fill(0)
+  );
+
+  for (let i = 0; i <= a.length; i++) {
+    matriz[i][0] = i;
+  }
+
+  for (let j = 0; j <= b.length; j++) {
+    matriz[0][j] = j;
+  }
+
+  for (let i = 1; i <= a.length; i++) {
+
+    for (let j = 1; j <= b.length; j++) {
+
+      const costo =
+        a[i - 1] === b[j - 1]
+          ? 0
+          : 1;
+
+      matriz[i][j] = Math.min(
+        matriz[i - 1][j] + 1,
+        matriz[i][j - 1] + 1,
+        matriz[i - 1][j - 1] + costo
+      );
+
+    }
+
+  }
+
+  const distancia =
+    matriz[a.length][b.length];
+
+  // Una letra de diferencia como máximo.
+  return distancia <= 1;
+}
+
 function calcularCoincidencia(dicho, correcto) {
 
   const palabrasDichas =
-    normalizarTexto(dicho).split(" ");
+    normalizarTexto(dicho)
+      .split(" ")
+      .filter(Boolean);
 
   const palabrasCorrectas =
-    normalizarTexto(correcto).split(" ");
+    normalizarTexto(correcto)
+      .split(" ")
+      .filter(Boolean);
 
   if (!palabrasCorrectas.length) {
     return 0;
   }
 
-  let coincidencias = 0;
+  // Compara respetando el orden de las palabras.
+  // Permite que el reconocimiento agregue u omita
+  // alguna palabra sin arruinar toda la comparación.
 
-  palabrasCorrectas.forEach(palabra => {
+  const filas =
+    palabrasCorrectas.length + 1;
 
-    if (palabrasDichas.includes(palabra)) {
-      coincidencias++;
+  const columnas =
+    palabrasDichas.length + 1;
+
+  const matriz =
+    Array.from(
+      { length: filas },
+      () => Array(columnas).fill(0)
+    );
+
+  for (let i = 1; i < filas; i++) {
+
+    for (let j = 1; j < columnas; j++) {
+
+      if (
+  palabrasParecidas(
+    palabrasCorrectas[i - 1],
+    palabrasDichas[j - 1]
+  )
+) {
+
+        matriz[i][j] =
+          matriz[i - 1][j - 1] + 1;
+
+      } else {
+
+        matriz[i][j] =
+          Math.max(
+            matriz[i - 1][j],
+            matriz[i][j - 1]
+          );
+
+      }
+
     }
 
-  });
+  }
 
-  return coincidencias / palabrasCorrectas.length;
+  const coincidencias =
+    matriz[filas - 1][columnas - 1];
+
+  return (
+    coincidencias /
+    palabrasCorrectas.length
+  );
 }
 
 
@@ -778,7 +1425,7 @@ function evaluarVoz(textoDicho) {
     );
 
 
-  if (porcentaje >= 0.90) {
+  if (porcentaje >= 0.80) {
 
     estadoMicrofono.textContent =
       `✓ ¡Muy bien! ${Math.round(porcentaje * 100)}%`;
@@ -980,6 +1627,507 @@ else if (botonHablar) {
 // MODO ENSAYO
 // ======================================================
 
+// ------------------------------------------------------
+// MICRÓFONO AUTOMÁTICO - ENSAYAR
+// ------------------------------------------------------
+
+let reconocimientoEnsayo = null;
+let ensayoAutomatico = false;
+let escuchandoEnsayo = false;
+let textoAcumuladoEnsayo = "";
+let textoIntermedioEnsayo = "";
+
+
+function iniciarMicrofonoEnsayo() {
+
+  if (!SpeechRecognition) {
+    console.warn("Reconocimiento de voz no disponible.");
+    return;
+  }
+
+  if (escuchandoEnsayo) {
+    return;
+  }
+
+  // Solo funcionar dentro de Modo Ensayar
+  const pantallaEnsayo =
+    porId("ensayar");
+
+  if (
+    !pantallaEnsayo ||
+    !pantallaEnsayo.classList.contains("activa")
+  ) {
+    return;
+  }
+
+
+  if (!reconocimientoEnsayo) {
+
+    reconocimientoEnsayo =
+      new SpeechRecognition();
+
+    reconocimientoEnsayo.lang = "es-CL";
+    reconocimientoEnsayo.continuous = true;
+    reconocimientoEnsayo.interimResults = true;
+
+
+    reconocimientoEnsayo.onstart = () => {
+
+      escuchandoEnsayo = true;
+      textoAcumuladoEnsayo = "";
+
+const botonTermine =
+  porId("ensayo-termine");
+
+if (botonTermine) {
+  botonTermine.classList.remove("oculto");
+}
+
+      const estado =
+        porId("estado-microfono-ensayo");
+
+      if (estado) {
+        estado.textContent = "🎤 Tu turno. Habla...";
+        estado.classList.remove("oculto");
+      }
+
+    };
+
+
+    reconocimientoEnsayo.onresult = evento => {
+
+  textoIntermedioEnsayo = "";
+
+  for (
+    let i = evento.resultIndex;
+    i < evento.results.length;
+    i++
+  ) {
+
+    const fragmento =
+      evento.results[i][0].transcript;
+
+    if (evento.results[i].isFinal) {
+
+      textoAcumuladoEnsayo +=
+        " " + fragmento;
+
+    } else {
+
+      textoIntermedioEnsayo +=
+  " " + fragmento;
+
+    }
+
+  }
+
+  const textoCompleto =
+    (
+      textoAcumuladoEnsayo +
+      " " +
+      textoIntermedioEnsayo
+    )
+      .replace(/\s+/g, " ")
+      .trim();
+
+const transcripcion =
+  porId("texto-reconocido-ensayo");
+
+if (transcripcion) {
+
+  transcripcion.textContent =
+    textoCompleto;
+
+  transcripcion.classList.remove("oculto");
+}
+
+}; // ← cierra reconocimientoEnsayo.onresult
+
+
+reconocimientoEnsayo.onend = () => {
+
+  escuchandoEnsayo = false;
+
+  // Mientras el ensayo siga activo, el micrófono
+  // debe volver a quedar escuchando automáticamente.
+  if (ensayoAutomatico) {
+
+    const pantallaEnsayo =
+      porId("ensayar");
+
+    const seguimosEnsayando =
+      pantallaEnsayo &&
+      pantallaEnsayo.classList.contains("activa");
+
+    if (seguimosEnsayando) {
+
+      setTimeout(() => {
+        iniciarMicrofonoEnsayo();
+      }, 250);
+
+    }
+
+  }
+
+};
+
+
+reconocimientoEnsayo.onerror = evento => {
+
+  escuchandoEnsayo = false;
+
+  // "no-speech" significa solamente que el actor
+  // estuvo un rato sin hablar. No es un error.
+  if (evento.error === "no-speech") {
+
+    const estado =
+      porId("estado-microfono-ensayo");
+
+    if (estado) {
+      estado.textContent = "🎤 Tu turno. Habla...";
+      estado.classList.remove("oculto");
+    }
+
+    return;
+  }
+
+
+  // Los errores reales sí se muestran.
+  console.error(
+    "Error reconocimiento ensayo:",
+    evento.error
+  );
+
+  const estado =
+    porId("estado-microfono-ensayo");
+
+  if (estado) {
+
+    estado.textContent =
+      `Error de micrófono: ${evento.error}`;
+
+    estado.classList.remove("oculto");
+
+  }
+
+};
+
+  }
+
+
+  try {
+
+    reconocimientoEnsayo.start();
+
+  } catch (error) {
+
+    console.error(
+      "No se pudo iniciar el micrófono de ensayo:",
+      error
+    );
+
+  }
+
+}
+
+// ------------------------------------------------------
+// TERMINÉ DE DECIR MI PARLAMENTO
+// ------------------------------------------------------
+
+const botonTermineEnsayo =
+  porId("ensayo-termine");
+
+if (botonTermineEnsayo) {
+
+  botonTermineEnsayo.addEventListener(
+    "click",
+    () => {
+
+      if (!escuchandoEnsayo) {
+        return;
+      }
+
+      const textoFinal =
+  (
+    textoAcumuladoEnsayo +
+    " " +
+    textoIntermedioEnsayo
+  )
+    .replace(/\s+/g, " ")
+    .trim();
+
+      if (!textoFinal) {
+        return;
+      }
+
+      botonTermineEnsayo.classList.add("oculto");
+
+      escuchandoEnsayo = false;
+
+      try {
+        reconocimientoEnsayo.stop();
+      } catch (error) {
+        console.warn(error);
+      }
+
+      evaluarVozEnsayo(textoFinal);
+
+    }
+  );
+
+}
+
+
+// ------------------------------------------------------
+// EVALUAR RESPUESTA EN ENSAYO
+// ------------------------------------------------------
+
+function evaluarVozEnsayo(textoDicho) {
+
+  const item =
+    listaEnsayo[indiceEnsayo];
+
+  if (!item) {
+    return;
+  }
+
+
+  const porcentaje =
+    calcularCoincidencia(
+      textoDicho,
+      item.lucas
+    );
+    // ------------------------------------------------------
+// GUARDAR RESULTADO PARA MANTENERLO VISIBLE
+// DURANTE EL SIGUIENTE PARLAMENTO
+// ------------------------------------------------------
+
+const resultadoAnterior =
+  porId("resultado-anterior-ensayo");
+
+const resultadoPorcentaje =
+  porId("resultado-anterior-porcentaje");
+
+const resultadoDicho =
+  porId("resultado-anterior-dicho");
+
+const resultadoOriginal =
+  porId("resultado-anterior-original");
+
+if (
+  resultadoAnterior &&
+  resultadoPorcentaje &&
+  resultadoDicho &&
+  resultadoOriginal
+) {
+
+  resultadoPorcentaje.textContent =
+    `${Math.round(porcentaje * 100)}%`;
+
+  resultadoDicho.textContent =
+    textoDicho;
+
+  resultadoOriginal.textContent =
+    item.lucas;
+
+  resultadoAnterior.classList.remove("oculto");
+}
+
+
+  const estado =
+    porId("estado-microfono-ensayo");
+    // Mostrar el parlamento original después de hablar
+const textoOriginal =
+  porId("ensayo-texto-lucas");
+
+if (textoOriginal) {
+
+  textoOriginal.innerHTML = `
+    <span class="etiqueta-original">
+      TEXTO ORIGINAL
+    </span>
+
+    <div class="texto-original-ensayo">
+      ${escaparHTML(item.lucas)}
+    </div>
+  `;
+
+  textoOriginal.className =
+    "respuesta-visible";
+}
+
+
+// Mostrar claramente lo que entendió Chrome
+const textoReconocido =
+  porId("texto-reconocido-ensayo");
+
+if (textoReconocido) {
+
+  textoReconocido.innerHTML = `
+    <span class="etiqueta-original">
+      ENTENDÍ
+    </span>
+
+    <div>
+      ${escaparHTML(textoDicho)}
+    </div>
+  `;
+
+  textoReconocido.classList.remove("oculto");
+}
+
+
+  // ------------------------------------------------------
+// RESULTADO DEL PARLAMENTO
+// En modo Ensayar SIEMPRE continuamos.
+// El porcentaje sirve para evaluar, no para bloquear.
+// ------------------------------------------------------
+
+const porcentajeNumero =
+  Math.round(porcentaje * 100);
+
+if (estado) {
+
+  if (porcentaje >= 0.95) {
+
+    estado.textContent =
+      `✓ Excelente · ${porcentajeNumero}%`;
+
+  } else if (porcentaje >= 0.80) {
+
+    estado.textContent =
+      `✓ Muy bien · ${porcentajeNumero}%`;
+
+  } else if (porcentaje >= 0.60) {
+
+    estado.textContent =
+      `Resultado · ${porcentajeNumero}%`;
+
+  } else {
+
+    estado.textContent =
+      `Resultado · ${porcentajeNumero}%`;
+
+  }
+
+  estado.classList.remove("oculto");
+}
+
+
+// Solo lo guardamos como DOMINADO
+// si obtuvo al menos 80%.
+
+if (porcentaje >= 0.80) {
+
+  agregarUnico(
+    dominados,
+    item.id
+  );
+
+  quitar(
+    dificiles,
+    item.id
+  );
+
+  guardarProgreso();
+}
+
+
+// ------------------------------------------------------
+// SIEMPRE PASAR AL SIGUIENTE
+// ------------------------------------------------------
+
+setTimeout(() => {
+
+  siguienteEnsayo();
+
+  const siguiente =
+    listaEnsayo[indiceEnsayo];
+
+  if (!siguiente) {
+    return;
+  }
+
+  hablar(
+    siguiente.pie,
+    siguiente.personajePie
+  );
+
+}, 900);
+
+}
+
+// ------------------------------------------------------
+// PLAY / PAUSA - ENSAYAR
+// ------------------------------------------------------
+
+let vozPausadaEnsayo = false;
+
+const botonPausarEnsayo =
+  porId("ensayo-pausar");
+
+if (botonPausarEnsayo) {
+
+  botonPausarEnsayo.addEventListener(
+    "click",
+    () => {
+
+      // Si está hablando, pausamos
+      if (
+        speechSynthesis.speaking &&
+        !speechSynthesis.paused
+      ) {
+
+        speechSynthesis.pause();
+
+        vozPausadaEnsayo = true;
+
+        botonPausarEnsayo.textContent = "▶";
+
+        return;
+      }
+
+
+      // Si estaba pausado, continuamos
+      if (
+        speechSynthesis.speaking &&
+        speechSynthesis.paused
+      ) {
+
+        speechSynthesis.resume();
+
+        vozPausadaEnsayo = false;
+
+        botonPausarEnsayo.textContent = "⏸";
+
+        return;
+      }
+
+
+      // Si no está hablando, iniciar / continuar
+// el ensayo automático.
+
+const item =
+  listaEnsayo[indiceEnsayo];
+
+if (!item) {
+  return;
+}
+
+ensayoAutomatico = true;
+vozPausadaEnsayo = false;
+
+botonPausarEnsayo.textContent = "⏸";
+
+hablar(
+  item.pie,
+  item.personajePie
+);
+
+    }
+  );
+
+}
 let listaEnsayo = [...guion];
 
 
@@ -1008,6 +2156,13 @@ function cargarEnsayo() {
     listaEnsayo[indiceEnsayo];
 
 
+  // Recordar el parlamento actual de Ensayar
+  localStorage.setItem(
+    "ultimoParlamentoEnsayo",
+    String(indiceEnsayo)
+  );
+
+
   porId("ensayo-numero").textContent =
     indiceEnsayo + 1;
 
@@ -1031,53 +2186,10 @@ function cargarEnsayo() {
     "respuesta-oculta";
 
 
-  porId("ensayo-evaluacion")
-    .classList.add("oculto");
+  
 }
 
 
-// ------------------------------------------------------
-// ESCUCHAR PIE
-// ------------------------------------------------------
-
-porId("ensayo-escuchar")
-  .addEventListener("click", () => {
-
-    const item =
-      listaEnsayo[indiceEnsayo];
-
-    hablar(
-  item.pie,
-  item.personajePie
-);
-
-  });
-
-
-// ------------------------------------------------------
-// MOSTRAR TEXTO
-// ------------------------------------------------------
-
-porId("ensayo-mostrar")
-  .addEventListener("click", () => {
-
-    const item =
-      listaEnsayo[indiceEnsayo];
-
-    const texto =
-      porId("ensayo-texto-lucas");
-
-    texto.textContent =
-      item.lucas;
-
-    texto.className =
-      "respuesta-visible";
-
-
-    porId("ensayo-evaluacion")
-      .classList.remove("oculto");
-
-  });
 
 
 // ------------------------------------------------------
@@ -1098,60 +2210,496 @@ function siguienteEnsayo() {
   cargarEnsayo();
 }
 
+// ------------------------------------------------------
+// SIGUIENTE MANUAL - ENSAYAR
+// ------------------------------------------------------
 
-porId("ensayo-bien")
+const botonSiguienteEnsayo =
+  porId("ensayo-siguiente");
+
+if (botonSiguienteEnsayo) {
+
+  botonSiguienteEnsayo.addEventListener(
+    "click",
+    () => {
+
+      // Detener el micrófono si está escuchando
+      if (
+        reconocimientoEnsayo &&
+        escuchandoEnsayo
+      ) {
+
+        try {
+          reconocimientoEnsayo.stop();
+        } catch (error) {
+          console.warn(error);
+        }
+
+      }
+
+      escuchandoEnsayo = false;
+
+      
+      // Detener la voz anterior
+      speechSynthesis.cancel();
+
+      // Mantener activo el ensayo automático
+      ensayoAutomatico = true;
+
+      // Ir al siguiente parlamento
+      siguienteEnsayo();
+
+      const siguiente =
+        listaEnsayo[indiceEnsayo];
+
+      if (!siguiente) {
+        return;
+      }
+
+      // El siguiente personaje habla automáticamente
+      setTimeout(() => {
+
+        hablar(
+          siguiente.pie,
+          siguiente.personajePie
+        );
+
+      }, 250);
+
+    }
+  );
+
+}
+
+
+
+
+// ------------------------------------------------------
+// REINICIAR ENSAYO
+// ------------------------------------------------------
+
+const botonReiniciarEnsayo =
+  porId("reiniciar-ensayo");
+
+if (botonReiniciarEnsayo) {
+
+  botonReiniciarEnsayo.addEventListener(
+    "click",
+    () => {
+
+      // Detener voz y micrófono actuales
+      speechSynthesis.cancel();
+
+      ensayoAutomatico = false;
+
+      if (reconocimientoEnsayo) {
+
+        try {
+          reconocimientoEnsayo.stop();
+        } catch (error) {
+          console.warn(error);
+        }
+
+      }
+
+      escuchandoEnsayo = false;
+
+      // Volver al primer parlamento
+      indiceEnsayo = 0;
+
+      cargarEnsayo();
+
+      // Dejar listo para comenzar nuevamente
+      const botonPausa =
+        porId("ensayo-pausar");
+
+      if (botonPausa) {
+        botonPausa.textContent = "▶";
+      }
+
+      const estado =
+        porId("estado-microfono-ensayo");
+
+      if (estado) {
+        estado.classList.add("oculto");
+      }
+
+      const botonTermine =
+        porId("ensayo-termine");
+
+      if (botonTermine) {
+        botonTermine.classList.add("oculto");
+      }
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+    }
+  );
+
+}
+
+
+// ------------------------------------------------------
+// IR A PARLAMENTO - ENSAYAR
+// ------------------------------------------------------
+
+const panelParlamentosEnsayo =
+  porId("panel-parlamentos-ensayo");
+
+const listaSelectorParlamentosEnsayo =
+  porId("lista-selector-parlamentos-ensayo");
+
+const vistaPreviaParlamentoEnsayo =
+  porId("vista-previa-parlamento-ensayo");
+
+const buscarParlamentoEnsayo =
+  porId("buscar-parlamento-ensayo");
+
+
+// ABRIR SELECTOR
+
+porId("abrir-selector-ensayo")
   .addEventListener("click", () => {
 
-    const item =
-      listaEnsayo[indiceEnsayo];
+    speechSynthesis.cancel();
 
-    agregarUnico(
-      dominados,
-      item.id
-    );
+    ensayoAutomatico = false;
 
-    quitar(
-      dificiles,
-      item.id
-    );
+    if (reconocimientoEnsayo) {
 
-    guardarProgreso();
+      try {
+        reconocimientoEnsayo.stop();
+      } catch (error) {
+        console.warn(error);
+      }
 
-    siguienteEnsayo();
+    }
+
+    escuchandoEnsayo = false;
+
+    panelParlamentosEnsayo.classList.remove("oculto");
+
+    buscarParlamentoEnsayo.value = "";
+
+    vistaPreviaParlamentoEnsayo.classList.add("oculto");
+
+    vistaPreviaParlamentoEnsayo.innerHTML = "";
+
+        cargarSelectorParlamentosEnsayo();
+
+    // Llevar la lista automáticamente al parlamento actual
+    setTimeout(() => {
+
+      const parlamentoActual =
+        listaSelectorParlamentosEnsayo.querySelector(
+          `[data-indice="${indiceEnsayo}"]`
+        );
+
+      if (parlamentoActual) {
+
+        parlamentoActual.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+
+      }
+
+    }, 50);
+
+    buscarParlamentoEnsayo.focus();
 
   });
 
 
-porId("ensayo-dificil")
+// CERRAR SELECTOR
+
+porId("cerrar-selector-ensayo")
   .addEventListener("click", () => {
 
-    const item =
-      listaEnsayo[indiceEnsayo];
-
-    agregarUnico(
-      dificiles,
-      item.id
-    );
-
-    quitar(
-      dominados,
-      item.id
-    );
-
-    guardarProgreso();
-
-    siguienteEnsayo();
+    panelParlamentosEnsayo.classList.add("oculto");
 
   });
 
 
-porId("ensayo-repetir")
-  .addEventListener("click", () => {
+// CREAR LISTA
 
-    cargarEnsayo();
+function cargarSelectorParlamentosEnsayo() {
 
+  const busqueda =
+    normalizarTexto(
+      buscarParlamentoEnsayo.value
+    );
+
+  const resultados =
+    listaEnsayo.filter((item, indice) => {
+
+      if (!busqueda) {
+        return true;
+      }
+
+      const numero =
+        String(indice + 1);
+
+      const contenido =
+        normalizarTexto(
+          `${item.personajePie} ${item.pie} ${item.lucas} ${item.acotacion || ""}`
+        );
+
+      return (
+        numero.includes(busqueda) ||
+        contenido.includes(busqueda)
+      );
+
+    });
+
+
+  if (!resultados.length) {
+
+    listaSelectorParlamentosEnsayo.innerHTML = `
+      <p class="sin-dificiles">
+        No encontré ningún parlamento.
+      </p>
+    `;
+
+    return;
+  }
+
+
+  listaSelectorParlamentosEnsayo.innerHTML =
+    resultados.map(item => {
+
+      const indiceReal =
+        listaEnsayo.findIndex(
+          elemento => elemento.id === item.id
+        );
+
+      const comienzoPie =
+        item.pie.length > 75
+          ? `${item.pie.slice(0, 75)}…`
+          : item.pie;
+
+      return `
+        <button
+          type="button"
+          class="opcion-parlamento opcion-parlamento-ensayo"
+          data-indice="${indiceReal}"
+        >
+
+          <strong>
+            #${indiceReal + 1}
+            ·
+            ${escaparHTML(
+              item.personajePie.toUpperCase()
+            )}
+          </strong>
+
+          <span>
+            ${escaparHTML(comienzoPie)}
+          </span>
+
+        </button>
+      `;
+
+    }).join("");
+
+
+  document
+    .querySelectorAll(".opcion-parlamento-ensayo")
+    .forEach(boton => {
+
+      boton.addEventListener("click", () => {
+
+        mostrarVistaPreviaParlamentoEnsayo(
+          Number(boton.dataset.indice)
+        );
+
+      });
+
+    });
+
+}
+
+
+// BUSCADOR
+
+buscarParlamentoEnsayo
+  .addEventListener(
+    "input",
+    cargarSelectorParlamentosEnsayo
+  );
+
+  // ------------------------------------------------------
+// VISTA PREVIA COMPLETA - ENSAYAR
+// ------------------------------------------------------
+
+function mostrarVistaPreviaParlamentoEnsayo(indice) {
+
+  const item =
+    listaEnsayo[indice];
+
+  if (!item) {
+    return;
+  }
+
+
+  const acotacion =
+    item.acotacion &&
+    item.acotacion.trim() !== ""
+      ? `
+          <div class="selector-acotacion">
+            <strong>Acotación</strong>
+
+            <p>
+              (${escaparHTML(item.acotacion)})
+            </p>
+          </div>
+        `
+      : "";
+
+
+  vistaPreviaParlamentoEnsayo.innerHTML = `
+
+    <div class="vista-previa-cabecera">
+
+      <strong>
+        Parlamento #${indice + 1}
+      </strong>
+
+      <span>
+        Acto ${item.acto}
+        · Cuadro ${item.cuadro}
+      </span>
+
+    </div>
+
+
+    <div class="selector-pie">
+
+      <strong>
+        ${escaparHTML(
+          item.personajePie.toUpperCase()
+        )}
+      </strong>
+
+      <p>
+        ${escaparHTML(item.pie)}
+      </p>
+
+    </div>
+
+
+    <div class="selector-lucas">
+
+      <strong>
+        LUCAS MEYER
+      </strong>
+
+      <p>
+        ${escaparHTML(item.lucas)}
+      </p>
+
+    </div>
+
+
+    ${acotacion}
+
+
+    <button
+      type="button"
+      id="confirmar-ir-parlamento-ensayo"
+      class="confirmar-ir-parlamento"
+    >
+      Comenzar ensayo desde #${indice + 1}
+    </button>
+
+  `;
+
+
+  vistaPreviaParlamentoEnsayo
+    .classList
+    .remove("oculto");
+
+
+  porId("confirmar-ir-parlamento-ensayo")
+    .addEventListener("click", () => {
+
+      // Detener cualquier voz anterior
+      speechSynthesis.cancel();
+
+      // Evitar que el micrófono se reinicie
+      // mientras cambiamos de parlamento.
+      ensayoAutomatico = false;
+
+      if (reconocimientoEnsayo) {
+
+        try {
+          reconocimientoEnsayo.stop();
+        } catch (error) {
+          console.warn(error);
+        }
+
+      }
+
+      escuchandoEnsayo = false;
+
+
+      // Ir al parlamento seleccionado
+      indiceEnsayo = indice;
+
+      cargarEnsayo();
+
+
+      // Cerrar selector
+      panelParlamentosEnsayo
+        .classList
+        .add("oculto");
+
+
+      // Comenzar automáticamente el ensayo
+      ensayoAutomatico = true;
+
+      const botonPausa =
+        porId("ensayo-pausar");
+
+      if (botonPausa) {
+        botonPausa.textContent = "⏸";
+      }
+
+
+      const seleccionado =
+        listaEnsayo[indiceEnsayo];
+
+      if (seleccionado) {
+
+        setTimeout(() => {
+
+          hablar(
+            seleccionado.pie,
+            seleccionado.personajePie
+          );
+
+        }, 250);
+
+      }
+
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+    });
+
+
+  vistaPreviaParlamentoEnsayo.scrollIntoView({
+    behavior: "smooth",
+    block: "nearest"
   });
 
+}
 
 // ------------------------------------------------------
 // SELECTOR ENSAYO
@@ -1637,8 +3185,14 @@ function iniciarAplicacion() {
   listaActual = [...guion];
   listaEnsayo = [...guion];
 
-  indiceAprender = 0;
-  indiceEnsayo = 0;
+  indiceAprender =
+  Number(
+    localStorage.getItem("ultimoParlamentoAprender")
+  ) || 0;
+    indiceEnsayo =
+    Number(
+      localStorage.getItem("ultimoParlamentoEnsayo")
+    ) || 0;
 
 
   cargarAprender();
