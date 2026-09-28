@@ -1424,6 +1424,37 @@ function evaluarVoz(textoDicho) {
       item.lucas
     );
 
+    // GUARDAR HISTORIAL DEL PARLAMENTO
+
+const historialEnsayo =
+  JSON.parse(
+    localStorage.getItem("historialEnsayoLucas") || "{}"
+  );
+
+const resultadoGuardado =
+  historialEnsayo[item.id] || {
+    ultimo: 0,
+    mejor: 0,
+    intentos: 0
+  };
+
+const porcentajeEntero =
+  Math.round(porcentaje * 100);
+
+historialEnsayo[item.id] = {
+  ultimo: porcentajeEntero,
+  mejor: Math.max(
+    resultadoGuardado.mejor,
+    porcentajeEntero
+  ),
+  intentos: resultadoGuardado.intentos + 1
+};
+
+localStorage.setItem(
+  "historialEnsayoLucas",
+  JSON.stringify(historialEnsayo)
+);
+
 
   if (porcentaje >= 0.80) {
 
