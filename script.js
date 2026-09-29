@@ -1144,9 +1144,23 @@ mensaje.rate = velocidadElegida;
     ensayoAutomatico
   ) {
 
-    setTimeout(() => {
-      iniciarMicrofonoEnsayo();
-    }, 350);
+  setTimeout(() => {
+
+  // Limpiar cualquier resto de la transcripción anterior
+  textoAcumuladoEnsayo = "";
+  textoIntermedioEnsayo = "";
+
+  const transcripcion =
+    porId("texto-reconocido-ensayo");
+
+  if (transcripcion) {
+    transcripcion.textContent = "";
+    transcripcion.classList.add("oculto");
+  }
+
+  iniciarMicrofonoEnsayo();
+
+}, 1500);
 
   }
 
@@ -1227,7 +1241,115 @@ const textoReconocido = porId("texto-reconocido");
 
 let reconocimiento = null;
 
+function numeroATexto(numero) {
 
+  if (!Number.isFinite(numero)) {
+    return String(numero);
+  }
+
+  const unidades = [
+    "cero", "uno", "dos", "tres", "cuatro",
+    "cinco", "seis", "siete", "ocho", "nueve"
+  ];
+
+  const especiales = [
+    "diez", "once", "doce", "trece", "catorce",
+    "quince", "dieciseis", "diecisiete",
+    "dieciocho", "diecinueve"
+  ];
+
+  const decenas = [
+    "", "", "veinte", "treinta", "cuarenta",
+    "cincuenta", "sesenta", "setenta",
+    "ochenta", "noventa"
+  ];
+
+  if (numero < 10) {
+    return unidades[numero];
+  }
+
+  if (numero < 20) {
+    return especiales[numero - 10];
+  }
+
+  if (numero < 30) {
+
+    if (numero === 20) {
+      return "veinte";
+    }
+
+    return "veinti" + unidades[numero - 20];
+  }
+
+  if (numero < 100) {
+
+    const decena =
+      Math.floor(numero / 10);
+
+    const unidad =
+      numero % 10;
+
+    return unidad === 0
+      ? decenas[decena]
+      : `${decenas[decena]} y ${unidades[unidad]}`;
+  }
+
+  if (numero === 100) {
+    return "cien";
+  }
+
+  if (numero < 200) {
+    return `ciento ${numeroATexto(numero - 100)}`;
+  }
+
+  if (numero < 1000) {
+
+    const centenas = [
+      "", "", "doscientos", "trescientos",
+      "cuatrocientos", "quinientos",
+      "seiscientos", "setecientos",
+      "ochocientos", "novecientos"
+    ];
+
+    const centena =
+      Math.floor(numero / 100);
+
+    const resto =
+      numero % 100;
+
+    return resto === 0
+      ? centenas[centena]
+      : `${centenas[centena]} ${numeroATexto(resto)}`;
+  }
+
+  if (numero < 2000) {
+
+    const resto =
+      numero - 1000;
+
+    return resto === 0
+      ? "mil"
+      : `mil ${numeroATexto(resto)}`;
+  }
+
+  if (numero < 1000000) {
+
+    const miles =
+      Math.floor(numero / 1000);
+
+    const resto =
+      numero % 1000;
+
+    const textoMiles =
+      `${numeroATexto(miles)} mil`;
+
+    return resto === 0
+      ? textoMiles
+      : `${textoMiles} ${numeroATexto(resto)}`;
+  }
+
+  return String(numero);
+}
 // ------------------------------------------------------
 // NORMALIZAR TEXTO
 // ------------------------------------------------------
@@ -1255,14 +1377,10 @@ function normalizarTexto(texto = "") {
   // Convierte cualquier grupo numérico dígito por dígito.
   // 123 -> uno dos tres
   // 1 2 3 -> uno dos tres
-  resultado = resultado.replace(
-    /\d+/g,
-    numero =>
-      numero
-        .split("")
-        .map(digito => digitos[digito] || digito)
-        .join(" ")
-  );
+resultado = resultado.replace(
+  /\d+/g,
+  numero => numeroATexto(Number(numero))
+);
 
   // Quitar puntuación y símbolos.
   resultado = resultado
@@ -1678,11 +1796,19 @@ function iniciarMicrofonoEnsayo() {
       escuchandoEnsayo = true;
       textoAcumuladoEnsayo = "";
 
-const botonTermine =
-  porId("ensayo-termine");
+const controlesMicrofono =
+  porId("controles-microfono-ensayo");
 
-if (botonTermine) {
-  botonTermine.classList.remove("oculto");
+const botonPausarMicrofono =
+  porId("ensayo-pausar-microfono");
+
+if (controlesMicrofono) {
+  controlesMicrofono.classList.remove("oculto");
+}
+
+if (botonPausarMicrofono) {
+  botonPausarMicrofono.textContent =
+    "⏸ Pausar micrófono";
 }
 
       const estado =
@@ -1750,26 +1876,10 @@ reconocimientoEnsayo.onend = () => {
 
   escuchandoEnsayo = false;
 
-  // Mientras el ensayo siga activo, el micrófono
-  // debe volver a quedar escuchando automáticamente.
-  if (ensayoAutomatico) {
-
-    const pantallaEnsayo =
-      porId("ensayar");
-
-    const seguimosEnsayando =
-      pantallaEnsayo &&
-      pantallaEnsayo.classList.contains("activa");
-
-    if (seguimosEnsayando) {
-
-      setTimeout(() => {
-        iniciarMicrofonoEnsayo();
-      }, 250);
-
-    }
-
-  }
+  // NO reiniciar el micrófono aquí.
+  // El siguiente turno de Lucas será iniciado
+  // únicamente cuando termine de hablar el personaje,
+  // desde mensaje.onend de hablar().
 
 };
 
@@ -1777,9 +1887,13 @@ reconocimientoEnsayo.onend = () => {
 reconocimientoEnsayo.onerror = evento => {
 
   escuchandoEnsayo = false;
-
+    // Si nosotros mismos detuvimos/cancelamos
+// el reconocimiento, no es un error real.
+if (evento.error === "aborted") {
+  return;
+}
   // "no-speech" significa solamente que el actor
-  // estuvo un rato sin hablar. No es un error.
+  // estuvo un rato sin hablar. No es un error
   if (evento.error === "no-speech") {
 
     const estado =
@@ -1831,7 +1945,60 @@ reconocimientoEnsayo.onerror = evento => {
   }
 
 }
+// ------------------------------------------------------
+// PAUSAR / REANUDAR MICRÓFONO DE ENSAYO
+// ------------------------------------------------------
 
+let microfonoEnsayoPausado = false;
+
+const botonPausarMicrofonoEnsayo =
+  porId("ensayo-pausar-microfono");
+
+if (botonPausarMicrofonoEnsayo) {
+
+  botonPausarMicrofonoEnsayo.addEventListener(
+    "click",
+    () => {
+
+      if (!microfonoEnsayoPausado) {
+
+        // PAUSAR
+        microfonoEnsayoPausado = true;
+
+        if (
+          reconocimientoEnsayo &&
+          escuchandoEnsayo
+        ) {
+          reconocimientoEnsayo.stop();
+        }
+
+        botonPausarMicrofonoEnsayo.textContent =
+          "▶ Reanudar micrófono";
+
+        const estado =
+          porId("estado-microfono-ensayo");
+
+        if (estado) {
+          estado.textContent =
+            "⏸ Micrófono pausado";
+        }
+
+      } else {
+
+        // REANUDAR
+        microfonoEnsayoPausado = false;
+
+        botonPausarMicrofonoEnsayo.textContent =
+          "⏸ Pausar micrófono";
+
+        iniciarMicrofonoEnsayo();
+
+      }
+
+    }
+  );
+
+}
 // ------------------------------------------------------
 // TERMINÉ DE DECIR MI PARLAMENTO
 // ------------------------------------------------------
@@ -1845,9 +2012,7 @@ if (botonTermineEnsayo) {
     "click",
     () => {
 
-      if (!escuchandoEnsayo) {
-        return;
-      }
+
 
       const textoFinal =
   (
@@ -1862,7 +2027,6 @@ if (botonTermineEnsayo) {
         return;
       }
 
-      botonTermineEnsayo.classList.add("oculto");
 
       escuchandoEnsayo = false;
 

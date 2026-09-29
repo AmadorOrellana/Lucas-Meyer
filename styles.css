@@ -864,7 +864,46 @@ main {
   border: 1px solid var(--borde);
   border-radius: var(--radio-grande);
 }
+/* COMPACTAR PANTALLA DE ENSAYO */
 
+#ensayar .titulo-seccion {
+  padding-top: 16px;
+  padding-bottom: 12px;
+}
+
+#ensayar .barra-filtros {
+  margin-bottom: 10px;
+}
+
+#ensayar .personaje-ensayo {
+  padding: 18px 24px;
+}
+
+#ensayar .personaje-ensayo > span {
+  margin-bottom: 7px;
+}
+
+#ensayar .personaje-ensayo p {
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+#ensayar .turno-lucas {
+  padding: 18px 24px;
+}
+
+#ensayar .indicador-turno {
+  margin-bottom: 8px;
+}
+
+#ensayar .turno-lucas > p {
+  margin: 5px 0;
+}
+
+#ensayar #ensayo-texto-lucas {
+  min-height: 35px;
+  margin: 3px auto 10px;
+}
 
 .estado-ensayo {
 
@@ -2337,4 +2376,52 @@ color: var(--texto);
   transform: translateY(-1px);
 
   filter: brightness(1.08);
+}
+
+/* =====================================================
+   CONTROLES DEL MICRÓFONO · ENSAYO
+   ===================================================== */
+
+.controles-microfono-ensayo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+  margin-top: 10px;
+}
+
+#ensayo-pausar-microfono,
+#ensayo-termine {
+  margin: 0;
+
+  padding: 10px 18px;
+
+  border-radius: 10px;
+
+  background: var(--superficie-clara);
+
+  color: var(--texto);
+
+  font-weight: 700;
+}
+
+#ensayo-pausar-microfono {
+  border: 1px solid var(--borde);
+}
+
+#ensayo-pausar-microfono:hover {
+  border-color: var(--dorado);
+  color: var(--dorado-claro);
+}
+
+#ensayo-termine {
+  border: 1px solid var(--verde);
+  background: rgba(101, 185, 130, 0.12);
+  color: var(--verde);
+}
+
+#ensayo-termine:hover {
+  background: var(--verde);
+  color: #0b0d10;
 }
