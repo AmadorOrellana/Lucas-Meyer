@@ -24,7 +24,7 @@
   --radio: 16px;
   --radio-grande: 24px;
 
-  --ancho: 1050px;
+  --ancho: 1350px;
 }
 
 
@@ -79,11 +79,11 @@ button {
    ========================================= */
 
 .topbar {
-  max-width: var(--ancho);
+  width: min(calc(100% - 32px), var(--ancho));
+  min-height: 70px;
 
-  margin: auto;
-
-  padding: 28px 24px 18px;
+  margin: 0 auto;
+  padding: 10px 0;
 
   display: flex;
   justify-content: space-between;
@@ -160,11 +160,11 @@ button {
    ========================================= */
 
 .navegacion {
-  max-width: var(--ancho);
+  width: min(calc(100% - 32px), var(--ancho));
+  min-height: 54px;
 
-  margin: 0 auto 25px;
-
-  padding: 6px;
+  margin: 0 auto 14px;
+  padding: 5px;
 
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -173,7 +173,7 @@ button {
   background: rgba(21, 25, 31, 0.92);
 
   border: 1px solid var(--borde);
-  border-radius: 15px;
+  border-radius: 14px;
 }
 
 
@@ -181,7 +181,7 @@ button {
   border: 0;
   border-radius: 10px;
 
-  padding: 11px 8px;
+  padding: 9px 8px;
 
   background: transparent;
 
@@ -867,8 +867,29 @@ main {
 /* COMPACTAR PANTALLA DE ENSAYO */
 
 #ensayar .titulo-seccion {
-  padding-top: 16px;
-  padding-bottom: 12px;
+  min-height: 82px;
+  padding: 12px 0 14px;
+
+  align-items: center;
+}
+
+#ensayar .titulo-seccion .etiqueta {
+  margin-bottom: 5px;
+  font-size: 0.68rem;
+  letter-spacing: 0.17em;
+}
+
+#ensayar .titulo-seccion h2 {
+  font-size: clamp(2rem, 3vw, 2.65rem);
+  line-height: 1;
+}
+
+#ensayar .controles-parlamento {
+  gap: 8px;
+}
+
+#ensayar .controles-parlamento button {
+  padding: 9px 14px;
 }
 
 #ensayar .barra-filtros {
@@ -876,33 +897,76 @@ main {
 }
 
 #ensayar .personaje-ensayo {
-  padding: 18px 24px;
+  min-height: 112px;
+  padding: 16px 22px;
+
+  display: grid;
+  grid-template-columns: 135px minmax(0, 1fr) 270px;
+  align-items: center;
+  gap: 22px;
+
+  text-align: left;
 }
 
 #ensayar .personaje-ensayo > span {
-  margin-bottom: 7px;
+  margin: 0;
+
+  color: var(--dorado);
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
 }
 
 #ensayar .personaje-ensayo p {
-  margin-bottom: 12px;
-  line-height: 1.4;
+  max-width: none;
+  margin: 0;
+
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+#ensayar .controles-ensayo-voz {
+  width: 100%;
+  justify-self: end;
 }
 
 #ensayar .turno-lucas {
-  padding: 18px 24px;
+  min-height: 150px;
+  padding: 20px 26px;
+
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto minmax(220px, 1fr);
+  align-items: center;
+  column-gap: 28px;
+
+  position: relative;
 }
 
 #ensayar .indicador-turno {
-  margin-bottom: 8px;
+  margin: 0;
+  align-self: center;
+
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 #ensayar .turno-lucas > p {
-  margin: 5px 0;
+  margin: 4px 0;
+  line-height: 1.35;
 }
 
 #ensayar #ensayo-texto-lucas {
-  min-height: 35px;
-  margin: 3px auto 10px;
+  min-height: 28px;
+  margin: 4px 0 0;
+
+  font-size: 0.92rem;
+  line-height: 1.35;
+
+  grid-column: 1;
+  justify-self: start;
+  text-align: left;
 }
 
 .estado-ensayo {
@@ -2383,12 +2447,19 @@ color: var(--texto);
    ===================================================== */
 
 .controles-microfono-ensayo {
+  grid-column: 3;
+  grid-row: 1 / span 4;
+
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
   gap: 10px;
 
-  margin-top: 10px;
+  width: 100%;
+  margin: 0;
+
+  align-self: center;
+  justify-self: end;
 }
 
 #ensayo-pausar-microfono,
