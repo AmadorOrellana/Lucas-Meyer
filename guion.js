@@ -10,7 +10,7 @@ const guion = [
     acto: 1,
     cuadro: 1,
     personajePie: "Pietá",
-    pie: "¡Oh, Lucas, es maravilloso... es maravilloso! ¡La vida es un sueño... un sueño! ¿Por qué? ¿Por qué somos ricos?",
+    pie: "¡Oh, Lucas, es maravilloso... es maravilloso! ¡La vida es un sueño... un sueño! ¿Por qué? ¿Por que somos ricos?",
     lucas: "Puede ser.",
     acotacion: ""
   },
@@ -506,7 +506,7 @@ const guion = [
     cuadro: 1,
     personajePie: "China",
     pie: "Ya lo decía yo, en cuanto vi lo limpios que tenía los vidrios de las ventanas: usted es un caballero. Sólo un caballero se preocupa de tenerlos tan limpios... Sin embargo, usted no debería pensar así.",
-    lucas: "¿Cómo? ¿Qué?",
+    lucas: "¿Cómo?",
     acotacion: ""
   },
 
